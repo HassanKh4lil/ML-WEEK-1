@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth Momentum Opportunity Scoring — A FlyRank Search Intelligence Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --paper: #EEF1EC;
+  --paper-raised: #F6F8F4;
+  --ink: #16211C;
+  --ink-soft: #3C463F;
+  --line: #C9D0C6;
+  --signal: #2F6F5E;
+  --signal-soft: #E1EAE3;
+  --gold: #C98A3D;
+  --clay: #A24936;
+  --clay-soft: #F1E1DC;
+  --max-body: 700px;
+  --max-wide: 980px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--gold); color: var(--paper); }
+
+a { color: var(--signal); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--gold); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.wide { max-width: var(--max-wide); margin: 0 auto; padding: 0 28px; }
+.body { max-width: var(--max-body); margin: 0 auto; padding: 0 28px; }
+
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--signal);
+  display: block;
+  margin-bottom: 14px;
+}
+
+h1, h2, h3 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5em 0;
+  color: var(--ink);
+}
+
+h2 { font-size: 30px; font-style: italic; font-weight: 500; }
+h3 { font-size: 20px; font-style: normal; font-weight: 600; }
+
+p { margin: 0 0 1.1em 0; }
+p:last-child { margin-bottom: 0; }
+
+.hero {
+  padding: 96px 0 64px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero h1 {
+  font-size: clamp(34px, 5.4vw, 54px);
+  line-height: 1.08;
+  max-width: 880px;
+  margin-bottom: 22px;
+}
+
+.hero .dek {
+  font-size: 19px;
+  color: var(--ink-soft);
+  max-width: 620px;
+  margin-bottom: 40px;
+}
+
+.window-strip {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  max-width: 720px;
+}
+
+.window-strip div {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.w-feat { flex: 3; background: var(--signal); color: var(--paper-raised); }
+.w-buffer { flex: 1; background: repeating-linear-gradient(135deg, var(--paper), var(--paper) 6px, var(--line) 6px, var(--line) 8px); color: var(--ink-soft); justify-content: center; }
+.w-label { flex: 3; background: var(--gold); color: var(--paper-raised); justify-content: flex-end; }
+
+section { padding: 64px 0; border-bottom: 1px solid var(--line); }
+section:last-of-type { border-bottom: none; }
+
+.abstract-box {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--signal);
+  padding: 28px 32px;
+  font-size: 16.5px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  margin: 24px 0;
+}
+
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.data-table th {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.data-table td.num { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+
+.excluded-list { list-style: none; padding: 0; margin: 20px 0 0 0; }
+.excluded-list li {
+  padding: 10px 0 10px 22px;
+  border-top: 1px solid var(--line);
+  position: relative;
+  font-size: 15.5px;
+  color: var(--ink-soft);
+}
+.excluded-list li:before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--clay);
+}
+
+.split-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+}
+
+@media (max-width: 760px) {
+  .split-cols { grid-template-columns: 1fr; }
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin: 28px 0;
+}
+
+@media (max-width: 700px) {
+  .metric-grid { grid-template-columns: 1fr; }
+}
+
+.metric-cell {
+  background: var(--paper-raised);
+  padding: 22px 20px;
+}
+
+.metric-cell .label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.metric-cell .value {
+  font-family: "Fraunces", serif;
+  font-size: 34px;
+  font-weight: 500;
+}
+
+.metric-cell.hi .value { color: var(--signal); }
+.metric-cell.mid .value { color: var(--ink-soft); }
+
+.chart-frame {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  padding: 20px;
+  margin: 30px 0;
+}
+
+.chart-frame img { width: 100%; height: auto; display: block; }
+.chart-frame .caption {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.limits-block {
+  border: 1px solid var(--clay);
+  background: var(--clay-soft);
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+
+.limits-block h3 { color: var(--clay); font-size: 16px; margin-bottom: 10px; }
+
+.tier-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; }
+.tier-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); padding: 10px 14px; border-bottom: 2px solid var(--ink); }
+.tier-table td { padding: 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tier-table td.num { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+.tier-tag { display: inline-block; padding: 3px 9px; font-family: "IBM Plex Mono", monospace; font-size: 12px; border: 1px solid currentColor; }
+.tag-amplify { color: var(--signal); }
+.tag-monitor { color: var(--gold); }
+.tag-none { color: var(--ink-soft); }
+
+.repro-list { list-style: none; padding: 0; margin: 24px 0 0 0; }
+.repro-list li { padding: 14px 0; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.repro-list li:last-child { border-bottom: 1px solid var(--line); }
+.repro-list .name { font-weight: 500; }
+.repro-list .path { font-family: "IBM Plex Mono", monospace; font-size: 13.5px; color: var(--ink-soft); }
+
+footer {
+  padding: 48px 0 80px 0;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+footer .credit {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+}
+
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="wide hero">
+  <span class="eyebrow">FlyRank Search Intelligence — Freestyle Capstone</span>
+  <h1>Content ages, positions settle, and most pages stop moving. This finds the ones that are about to.</h1>
+  <p class="dek">A page-level model for spotting which content is likely to outgrow its own site's baseline over the following quarter, built and validated end to end on FlyRank's search performance warehouse.</p>
+  <div class="window-strip">
+    <div class="w-feat">SEP – NOV 2025, FEATURES</div>
+    <div class="w-buffer">DEC, UNTOUCHED</div>
+    <div class="w-label">JAN – MAR 2026, LABEL</div>
+  </div>
+</div>
+
+<section class="body reveal">
+  <span class="eyebrow">Abstract</span>
+  <div class="abstract-box">
+    <p>Content teams routinely have to decide which of thousands of published pages deserve a promotion push and which don't — usually guessing from raw traffic or gut feel. This study asks whether a page's own search and engagement signals, observed over one quarter, can predict whether it will outperform its site's typical growth in the following quarter. Using three months of FlyRank warehouse data as features, a full untouched buffer month, and the following quarter as an independently computed label, a random forest classifier was validated against a client-grouped holdout split. The model reached a 0.712 ROC-AUC and 0.413 PR-AUC, against a 0.515 and 0.236 baseline that ranks purely by keyword search volume — nearly doubling precision-recall performance. The result is a ranked, three-tier action list rather than a single accuracy number: pages to amplify, pages to monitor, and pages to leave alone.</p>
+  </div>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Introduction</span>
+  <h2>The decision this supports</h2>
+  <p>A content or SEO team managing hundreds or thousands of live pages cannot manually review each one every quarter. Some pages are quietly compounding — climbing positions, picking up more engaged sessions, worth a deliberate push. Most are flat. A smaller number are fading and might need a rewrite or a prune, but that is a different question from this one. This work is scoped narrowly: given what's already true about a page as of today, which ones are the best bets for active amplification — internal linking, promotion, distribution — over the next quarter, relative to how that specific site's content typically performs.</p>
+  <p>That last clause matters. A page growing 40% alongside a client whose entire site is growing 40% has told you nothing about the page itself. The label in this study is defined relative to each client's own median, so the model is forced to find page-level signal rather than restating site-wide momentum.</p>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Data</span>
+  <h2>What went in, and what was left out</h2>
+  <p>All data comes from the FlyRank ML Internship warehouse release, accessed as Parquet tables. Three tables were used:</p>
+  <table class="data-table">
+    <thead><tr><th>Table</th><th>Role</th><th>Window used</th></tr></thead>
+    <tbody>
+      <tr><td>fact_content_daily_performance</td><td>Daily GSC + GA4 metrics per page, partitioned monthly, Jan 2025 – Jun 2026</td><td>Sep 1 2025 – Mar 31 2026</td></tr>
+      <tr><td>dim_content</td><td>Static content and keyword attributes (word count, competition, content type, dates)</td><td>Snapshot, no date window</td></tr>
+      <tr><td>dim_clients</td><td>Client status flags, used only to filter to active clients</td><td>Snapshot, no date window</td></tr>
+    </tbody>
+  </table>
+  <p>Everything is joined and reported on hashed client and content identifiers only. No client name, domain, URL, query text, or credential appears anywhere downstream of the raw warehouse.</p>
+  <p>Excluded, deliberately:</p>
+  <ul class="excluded-list">
+    <li><strong>fact_content_query_90d</strong> — this table ships pre-computed last-30/previous-30 trend windows. Using it risked circular leakage into a growth label, so it was left out entirely in favor of building the feature and label windows by hand from the daily fact table.</li>
+    <li><strong>Unpublished or deleted content</strong> — filtered via dim_content flags; not live pages a team could act on.</li>
+    <li><strong>Inactive clients</strong> — filtered via dim_clients; historical accounts no longer being actioned.</li>
+    <li><strong>Low-coverage or low-volume pages</strong> — any page with fewer than 30 covered days in either window, or fewer than 50 total impressions in the feature window, was dropped. Below that floor, daily-rate math is mostly noise.</li>
+  </ul>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Methodology</span>
+  <h2>Two separations, not one</h2>
+  <p>The core risk in any "will this grow" model is leakage — letting information from the future, directly or by proxy, into the features. Two independent separations guard against it here:</p>
+  <div class="split-cols">
+    <div>
+      <h3>Time</h3>
+      <p>Every feature is aggregated only from Sep 1 – Dec 1, 2025. December 2025 is a full calendar month touched by nothing in this study. The label is computed only from Jan 1 – Apr 1, 2026, strictly after that buffer. A query against the raw daily table confirms the two date ranges never overlap before any modeling begins.</p>
+    </div>
+    <div>
+      <h3>Client group</h3>
+      <p>Train and test are split by client_hash_id using a grouped shuffle split, so no single client's pages appear on both sides. This guards against the model simply memorizing a client's typical traffic level rather than learning transferable page-level patterns.</p>
+    </div>
+  </div>
+  <h3 style="margin-top:36px">Label definition</h3>
+  <p>Raw quarter-over-quarter impression growth turned out to be almost useless as a label on its own: three-quarters of all pages showed some positive growth, mostly because whole sites were trending upward together over this period. The label used here instead measures each page's growth relative to its own client's median growth in the same window — isolating pages that outperformed their peers on the same site, not ones that simply rode a site-wide tide. The top 30% of pages by this relative measure are labeled as growth candidates.</p>
+  <h3 style="margin-top:28px">Features and baseline</h3>
+  <p>Features come only from the Sep–Nov window: impressions, clicks, click-through rate, average position, sessions, engagement rate, AI-referral share, scroll rate, plus static content attributes — word count, character count, content age, days since last optimization, search volume, competition, keyword length, content type, and search intent. The baseline is the simplest thing a team might already do without any model: rank pages by keyword search volume alone.</p>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Results</span>
+  <h2>Model against baseline, same holdout</h2>
+  <div class="metric-grid">
+    <div class="metric-cell mid"><span class="label">Baseline · ROC-AUC</span><span class="value">0.515</span></div>
+    <div class="metric-cell mid"><span class="label">Logistic Regression</span><span class="value">0.668</span></div>
+    <div class="metric-cell hi"><span class="label">Random Forest</span><span class="value">0.712</span></div>
+  </div>
+  <p>PR-AUC tells a similar story and matters more here given the 30/70 class split: baseline 0.236, logistic regression 0.325, random forest 0.413 — nearly double the baseline's precision-recall performance across all thresholds.</p>
+  <div class="chart-frame">
+    <img src="assets/roc_curve.png" alt="ROC curve comparing baseline, logistic regression, and random forest on the held-out client group">
+    <div class="caption">ROC curve, client-grouped holdout split. Random forest separates furthest from the diagonal in the low false-positive region, where a ranked action list actually gets used.</div>
+  </div>
+  <div class="chart-frame">
+    <img src="assets/feature_importance.png" alt="Top 15 random forest feature importances">
+    <div class="caption">Feature-window impressions and average position lead, but content age and days since last optimization sit right behind them — older, un-refreshed pages are disproportionately represented among the pages that go on to outperform.</div>
+  </div>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Limitations & honest framing</span>
+  <h2>What this is, and isn't, saying</h2>
+  <div class="limits-block">
+    <h3>Observed, not causal</h3>
+    <p>The model finds association between a page's Sep–Nov signals and its relative performance in Jan–Mar. It does not identify what caused any individual page to grow, and it makes no claim about how Google's ranking systems work.</p>
+  </div>
+  <div class="limits-block">
+    <h3>Directional, not deterministic</h3>
+    <p>A 0.712 ROC-AUC is a real, useful lift over the baseline — it is not a page-by-page guarantee. The output is best read as a ranked prioritization, not a yes/no verdict on any single page.</p>
+  </div>
+  <div class="limits-block">
+    <h3>Decision-support, not autopilot</h3>
+    <p>Because feature-window impressions and position are the strongest predictors, the model partly reflects "pages already doing reasonably well tend to keep outperforming their site's median." That's a legitimate and actionable pattern for prioritization, but it means the ranked list should inform a human review, not replace one — especially for pages near the amplify/monitor boundary.</p>
+  </div>
+  <div class="limits-block">
+    <h3>Scope of the data</h3>
+    <p>Results reflect one 7-month span across FlyRank's client base as of this dataset release, filtered to active clients and pages with meaningful traffic. Seasonal effects specific to this window, or patterns among very low-traffic pages excluded by the volume floor, are not covered.</p>
+  </div>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Ranked recommendations</span>
+  <h2>The action playbook</h2>
+  <p>Every page in the holdout set gets a random forest growth score and one of three tiers. Tiers are ordered correctly and separate cleanly — amplify-tier pages actually went on to outperform their peers 50.7% of the time, versus 27.8% for monitor and 11.0% for no-action, which is the real test of whether a ranking is useful.</p>
+  <table class="tier-table">
+    <thead><tr><th>Tier</th><th>Score threshold</th><th>Observed outperformance rate</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tier-tag tag-amplify">Amplify</span></td><td class="num">score &gt; 0.70</td><td class="num">50.7%</td><td>Invest in promotion, internal linking, and distribution now.</td></tr>
+      <tr><td><span class="tier-tag tag-monitor">Monitor</span></td><td class="num">0.40 – 0.70</td><td class="num">27.8%</td><td>Moderate signal — revisit at the next quarterly review.</td></tr>
+      <tr><td><span class="tier-tag tag-none">No action</span></td><td class="num">score &lt; 0.40</td><td class="num">11.0%</td><td>Low growth probability — leave as-is, or route to a separate decline/refresh review.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="body reveal">
+  <span class="eyebrow">Reproducibility</span>
+  <h2>Where the work lives</h2>
+  <ul class="repro-list">
+    <li><span class="name">Warehouse discovery notebook</span><span class="path">work/00_warehouse_discovery.ipynb</span></li>
+    <li><span class="name">Feature, label, and modeling pipeline</span><span class="path">work/01_capstone_pipeline.ipynb</span></li>
+    <li><span class="name">Weekly assignment notebooks</span><span class="path">work/*.ipynb</span></li>
+    <li><span class="name">Repository</span><span class="path">github.com/HassanKh4lil/ML-WEEK-1</span></li>
+  </ul>
+</section>
+
+<footer class="body">
+  <p class="credit">Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai" target="_blank" rel="noopener">flyrank.ai</a></p>
+</footer>
+
+<script>
+var targets = document.querySelectorAll(".reveal");
+var seen = new Set();
+var io = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting && !seen.has(e.target)) {
+      seen.add(e.target);
+      e.target.classList.add("in");
+    }
+  });
+}, { threshold: 0.08 });
+targets.forEach(function(t) { io.observe(t); });
+</script>
+
+</body>
+</html>
